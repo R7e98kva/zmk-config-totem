@@ -3,68 +3,235 @@
 //                                                        ▄▀▀▀▄  ▄  ▄▀▀▀▄  ▄  ▄▀▀▀▄  █  ▄▀▀▀▄
 //                                                        █   █  █  █   █  █  █   █  █  █   █
 //                                                         ▀▀▀   █   ▀▀▀   █   ▀▀▀   ▀   ▀▀▀
-//                                                               █      ▄▄▄█▄▄▄    █   █  
+//                                                               █      ▄▄▄█▄▄▄    █   █
 //                                                               ▀      █  █  █     █▄█
 //                                                             ▀▀▀▀▀    █  █  █      ▀
 //                                                                      ▀  ▀  ▀
 //
-// ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+// ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+//
+// Keymap ported from the author's urchin config (see TOTEM_PORT_SPEC.md).
+// OS keyboard layout = German (DE): the raw keycodes below are chosen to
+// render German characters (umlauts, ß, §, € …) — do not read them as their
+// US-ANSI legends.
+//
+// Totem key positions:
+//
+//   0  1  2  3  4     |     5  6  7  8  9      top row
+//  10 11 12 13 14     |    15 16 17 18 19      home row
+//  20 21 22 23 24 25  |   26 27 28 29 30 31    bottom row (20/31 = extra outer keys → dedicated Shift)
+//        32 33 34     |      35 36 37          thumbs (32/37 unused, keys sit on the inner thumbs)
+//
+// Differences to a straight urchin port:
+//  * Positions 20/31 (new bottom-outer keys) = dedicated plain Shift keys.
+//  * Home-row Shift mod-taps (I / T) removed — Shift has its own keys now.
+//  * Thumb keys sit on the inner thumb positions (33/34/35/36), the outer
+//    thumbs (32/37) are unused.
+//
 
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/mods.h>
+#include <dt-bindings/zmk/bt.h>
 
 #define BASE 0
-#define NAV  1
-#define SYM  2
-#define ADJ  3
-#define TVP1 4
-#define TVP2 5
+#define SHORTNAVI 1
+#define SYMNUM 2
+// 3 = FNBLE — momentary via the Space+Enter combo, referenced as &mo 3
+// 4 = HYPR  — activated by holding Space (hyper_space), referenced by hyper_gui
 
 &mt {
-    quick-tap-ms = <100>;
-    global-quick-tap;
-    flavor = "tap-preferred";
-    tapping-term-ms = <170>;
+    flavor = "balanced";
 };
 
 / {
     combos {
         compatible = "zmk,combos";
 
-        combo_esc {
-            timeout-ms = <50>;
-            key-positions = <0 1>;
+        combo_escape {
+            timeout-ms = <70>;
+            key-positions = <1 2>;
             bindings = <&kp ESC>;
+            layers = <BASE>;
         };
 
-        combo_tvp {
+        combo_auml {
+            timeout-ms = <70>;
+            key-positions = <11 12>;
+            bindings = <&kp APOSTROPHE>;   // ä
+            layers = <BASE>;
+        };
+
+        combo_ouml {
+            timeout-ms = <70>;
+            key-positions = <2 12>;
+            bindings = <&kp SEMICOLON>;    // ö
+            layers = <BASE>;
+        };
+
+        combo_uuml {
+            timeout-ms = <70>;
+            key-positions = <12 14>;
+            bindings = <&kp LEFT_BRACKET>; // ü
+            layers = <BASE>;
+        };
+
+        combo_ei {
+            timeout-ms = <70>;
+            key-positions = <12 13>;
+            bindings = <&ei_key>;
+            layers = <BASE>;
+        };
+
+        combo_caps_word {
+            timeout-ms = <50>;
+            key-positions = <14 15>;
+            bindings = <&caps_word>;
+            layers = <BASE>;
+        };
+
+        // both inner thumbs (Space + Enter) — active on all layers
+        combo_fn_ble {
+            timeout-ms = <60>;
+            key-positions = <34 35>;
+            bindings = <&mo 3>;
+        };
+
+        // H + A + E + I together, while on FNBLE: clears the BT bond
+        combo_del_ble {
             timeout-ms = <100>;
-            key-positions = <11 12 13>;
-            bindings = <&tog 0>;
+            key-positions = <10 11 12 13>;
+            bindings = <&bt BT_CLR>;
+            layers = <3>;
+        };
+
+        combo_backspace {
+            timeout-ms = <70>;
+            key-positions = <8 7>;
+            bindings = <&kp BACKSPACE>;
+            layers = <BASE 2>;
+        };
+
+        combo_delete {
+            timeout-ms = <70>;
+            key-positions = <24 23>;
+            bindings = <&kp DELETE>;
+            layers = <BASE>;
         };
     };
 
     macros {
-        gif: gif {
-            label = "giphy";
+        // hold Space: activates layer 4 (HYPR) and holds Super as long as held
+        hyper_gui: hyper_gui {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             bindings =
-                <&macro_press>,
-                <&kp LSHFT>,
-                <&macro_tap>,
-                <&kp N2>,
-                <&macro_release>,
-                <&kp LSHFT>,
-                <&macro_tap>,
-                <&kp G &kp I &kp F>;
+                <&macro_press &mo 4 &kp LGUI>,
+                <&macro_pause_for_release>,
+                <&macro_release &mo 4 &kp LGUI>;
+        };
+
+        ei_key: ei_key {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            bindings = <&kp E &kp I>;
+        };
+    };
+
+    behaviors {
+        hyper_space: hyper_space {
+            compatible = "zmk,behavior-hold-tap";
+            bindings = <&hyper_gui>, <&kp>;
+            flavor = "hold-preferred";
+            #binding-cells = <2>;
+            tapping-term-ms = <200>;
+            quick-tap-ms = <400>;
+        };
+
+        // mod-morphs: first binding = normal, second = with Shift held
+        // (all outputs are German-layout characters)
+        sl_qu: sl_qu {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp LS(N7)>, <&kp LS(N1)>;           // /  →  !
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+        };
+
+        add_mult: add_mult {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp RIGHT_BRACKET>, <&kp LS(RIGHT_BRACKET)>;  // +  →  *
+            mods = <(MOD_LSFT)>;
+        };
+
+        sub_div: sub_div {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp SLASH>, <&kp LS(N7)>;            // -  →  /
+            mods = <(MOD_LSFT)>;
+        };
+
+        eur_usd: eur_usd {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp LS(N4)>, <&kp RA(E)>;            // $  →  €
+            mods = <(MOD_LSFT)>;
+        };
+
+        tilde_circumflex: tilde_circumflex {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp RA(RIGHT_BRACKET)>, <&kp GRAVE>; // ~  →  ^
+            mods = <(MOD_LSFT)>;
+        };
+
+        ticks: ticks {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp EQUAL>, <&kp LS(EQUAL)>;         // ´  →  `
+            mods = <(MOD_LSFT)>;
+        };
+
+        quotes: quotes {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp LS(BACKSLASH)>, <&kp LS(N2)>;    // '  →  "
+            mods = <(MOD_LSFT)>;
+        };
+
+        lesser_bracket: lesser_bracket {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp LS(N8)>, <&kp NON_US_BSLH>;      // (  →  <
+            mods = <(MOD_LSFT)>;
+        };
+
+        bigger_bracket: bigger_bracket {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp LS(N9)>, <&kp LS(NON_US_BSLH)>;  // )  →  >
+            mods = <(MOD_LSFT)>;
+        };
+
+        and_law: and_law {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp LS(N6)>, <&kp LS(N3)>;           // &  →  §
+            mods = <(MOD_LSFT)>;
+        };
+
+        at_hash: at_hash {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp RA(Q)>, <&kp NUHS>;              // @  →  #
+            mods = <(MOD_LSFT)>;
         };
     };
 
     keymap {
         compatible = "zmk,keymap";
 
-        // ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+        // ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 
         base_layer {
             // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -73,27 +240,160 @@
 
             // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
             //             ┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓   ┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓
-            //             ┃     Q     ┃     W     ┃     F     ┃     P     ┃     G     ┃   ┃     J     ┃     L     ┃     U     ┃     Y     ┃     ;     ┃
+            //             ┃     Q     ┃     Y     ┃     O     ┃     P     ┃     Z     ┃   ┃     W     ┃     C     ┃     M     ┃     V     ┃     X     ┃
             //             ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫
-            //             ┃     A     ┃     R     ┃     S     ┃     T     ┃     D     ┃   ┃     H     ┃     N     ┃     E     ┃     I     ┃     O     ┃
+            //             ┃  CTRL+H   ┃   ALT+A   ┃   GUI+E   ┃     I     ┃     U     ┃   ┃     D     ┃     T     ┃   GUI+N   ┃  ALTGR+S  ┃  CTRL+R   ┃
             // ┏━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┓
-            // ┃     Q     ┃     Z     ┃     X     ┃     C     ┃     V     ┃     B     ┃   ┃     K     ┃     M     ┃     ,     ┃     .     ┃     /     ┃     \     ┃
+            // ┃   SHIFT   ┃     J     ┃     .     ┃     ,     ┃     K     ┃     /     ┃   ┃     B     ┃     G     ┃     L     ┃     F     ┃     ß     ┃   SHIFT   ┃
             // ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
-            //                                     ┃    DEL    ┃    TAB    ┃    SPC    ┃   ┃   ENTER   ┃           ┃   BSPC    ┃
+            //                                     ┃  (none)   ┃  TAB/L1   ┃  SPC/HYP  ┃   ┃   ENTER   ┃   -/L2    ┃  (none)   ┃
             //                                     ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛   ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
+            //
+            // home row holds: CTRL / ALT / GUI / ALTGR / CTRL
+            // thumb holds:    TAB → layer 1, SPC → layer 4 + Super (hyper), - → layer 2
+            // bottom-outer keys: plain Shift (replaces the home-row shift mod-taps)
 
             bindings = <
-           &kp Q  &kp Z       &kp O      &kp P      &kp Y              &kp W    &kp C      &kp M     &kp V  &kp X
-           &kp H  &kp A       &kp E      &kp I      &kp U              &kp D    &kp T      &kp N     &kp S  &kp R
-&kp LSHFT  &kp J  &kp PERIOD  &kp COMMA  &kp K      &kp EXCLAMATION    &kp B    &kp G      &kp L     &kp F  &kp QMARK  &kp RSHFT
-                              &kp DEL    &lt 0 TAB  &kp SPACE          &kp RET  &lt 0 ESC  &kp BSPC
+//  0           1           2           3           4               5           6           7           8           9
+                &kp Q       &kp Y       &kp O       &kp P       &kp Z           &kp W       &kp C       &kp M       &kp V       &kp X
+//  10          11          12          13          14              15          16          17          18          19
+                &mt LCTRL H &mt LALT A  &mt LGUI E  &kp I       &kp U           &kp D       &kp T       &mt RGUI N  &mt RALT S  &mt RCTRL R
+//  20          21          22          23          24          25          26          27          28          29          30          31
+    &kp LSHIFT  &kp J       &kp PERIOD  &kp COMMA   &kp K       &sl_qu          &kp B       &kp G       &kp L       &kp F       &kp MINUS   &kp RSHIFT
+//                                          32          33              34                    35          36            37
+                                            &none       &lt 1 TAB   &hyper_space 0 SPACE    &kp RETURN  &lt 2 SLASH  &none
             >;
         };
 
-        // ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-        // ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-        // ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-        // ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
-        // ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+        // ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+        shortnavi_layer {
+            // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+
+            label = "SHORTNAVI";
+
+            // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+            //             ┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓   ┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓
+            //             ┃    C+Q    ┃    C+W    ┃    C+E    ┃    C+R    ┃    C+T    ┃   ┃   PGUP    ┃   HOME    ┃     UP    ┃    END    ┃  (none)   ┃
+            //             ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫
+            //             ┃    C+A    ┃    C+S    ┃    C+D    ┃    C+F    ┃    C+G    ┃   ┃   PGDN    ┃   LEFT    ┃   DOWN    ┃   RIGHT   ┃   SHIFT   ┃
+            // ┏━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┓
+            // ┃  (trans)  ┃    C+Y    ┃    C+X    ┃    C+C    ┃    C+V    ┃    C+B    ┃   ┃   PSCR    ┃     1     ┃     2     ┃     3     ┃  (none)   ┃  (trans)  ┃
+            // ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
+            //                                     ┃  (none)   ┃  (trans)  ┃  (none)   ┃   ┃  (none)   ┃  (none)   ┃  (none)   ┃
+            //                                     ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛   ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
+            //
+            // C+X = Ctrl+X (layout-independent); reached by holding the TAB thumb
+
+            bindings = <
+//  0           1           2           3           4               5           6           7           8           9
+                &kp LC(Q)   &kp LC(W)   &kp LC(E)   &kp LC(R)   &kp LC(T)       &kp PAGE_UP &kp HOME    &kp UP      &kp END     &none
+//  10          11          12          13          14              15          16          17          18          19
+                &kp LC(A)   &kp LC(S)   &kp LC(D)   &kp LC(F)   &kp LC(G)       &kp PAGE_DOWN &kp LEFT  &kp DOWN    &kp RIGHT   &kp LSHIFT
+//  20          21          22          23          24          25          26          27          28          29          30          31
+    &trans      &kp LC(Y)   &kp LC(X)   &kp LC(C)   &kp LC(V)   &kp LC(B)       &kp PRINTSCREEN &kp N1  &kp N2      &kp N3      &none       &trans
+//                                          32          33          34          35          36          37
+                                            &none       &trans      &none       &none       &none       &none
+            >;
+        };
+
+        // ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+        symnum_layer {
+            // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+
+            label = "SYMNUM";
+
+            // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+            //             ┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓   ┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓
+            //             ┃   ´ / `   ┃   $ / €   ┃   ' / "   ┃     [     ┃     ]     ┃   ┃     .     ┃     7     ┃     8     ┃     9     ┃   + / *   ┃
+            //             ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫
+            //             ┃   ~ / ^   ┃     \     ┃   @ / #   ┃   ( / <   ┃   ) / >   ┃   ┃     0     ┃     4     ┃     5     ┃     6     ┃   - / /   ┃
+            // ┏━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┓
+            // ┃  (trans)  ┃   & / §   ┃     %     ┃     |     ┃     {     ┃     }     ┃   ┃     ,     ┃     1     ┃     2     ┃     3     ┃     =     ┃  (trans)  ┃
+            // ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
+            //                                     ┃  (none)   ┃   SHIFT   ┃  (none)   ┃   ┃  (none)   ┃  (trans)  ┃  (none)   ┃
+            //                                     ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛   ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
+            //
+            // x / y = normal / with Shift held (mod-morphs)
+            // reached by holding the right-outer thumb (-); TAB thumb = Shift on this layer
+
+            bindings = <
+//  0           1           2           3           4               5           6           7           8           9
+                &ticks      &eur_usd    &quotes     &kp RA(N8)  &kp RA(N9)      &kp PERIOD  &kp N7      &kp N8      &kp N9      &add_mult
+//  10          11          12          13          14              15          16          17          18          19
+                &tilde_circumflex &kp RA(MINUS) &at_hash &lesser_bracket &bigger_bracket &kp N0  &mt LSHIFT N4 &kp N5    &kp N6      &sub_div
+//  20          21          22          23          24          25          26          27          28          29          30          31
+    &trans      &and_law    &kp LS(N5)  &kp RA(NON_US_BSLH) &kp RA(N7) &kp RA(N0) &kp COMMA &kp N1    &kp N2      &kp N3      &kp LS(N0)  &trans
+//                                          32          33          34          35          36          37
+                                            &none       &kp LSHIFT  &none       &none       &trans      &none
+            >;
+        };
+
+        // ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+        fnble_layer {
+            // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+
+            label = "FNBLE";
+
+            // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+            //             ┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓   ┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓
+            //             ┃  (none)   ┃  (none)   ┃  (none)   ┃  (none)   ┃  (none)   ┃   ┃  (none)   ┃    F7     ┃    F8     ┃    F9     ┃    F10    ┃
+            //             ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫
+            //             ┃   BT 4    ┃   BT 3    ┃   BT 2    ┃   BT 1    ┃   BT 0    ┃   ┃  (none)   ┃    F4     ┃    F5     ┃    F6     ┃    F11    ┃
+            // ┏━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┓
+            // ┃  (trans)  ┃  (none)   ┃  (none)   ┃  (none)   ┃  (none)   ┃  (none)   ┃   ┃    F1     ┃    F2     ┃    F3     ┃    F12    ┃  (none)   ┃  (trans)  ┃
+            // ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
+            //                                     ┃  (none)   ┃  (none)   ┃  (trans)  ┃   ┃  (trans)  ┃  (none)   ┃  (none)   ┃
+            //                                     ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛   ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
+            //
+            // reached by holding both inner thumbs (Space + Enter);
+            // del_ble combo (H A E I) clears the BT bond while on this layer
+
+            bindings = <
+//  0           1           2           3           4               5           6           7           8           9
+                &none       &none       &none       &none       &none           &none       &kp F7      &kp F8      &kp F9      &kp F10
+//  10          11          12          13          14              15          16          17          18          19
+                &bt BT_SEL 4 &bt BT_SEL 3 &bt BT_SEL 2 &bt BT_SEL 1 &bt BT_SEL 0  &none       &kp F4      &kp F5      &kp F6      &kp F11
+//  20          21          22          23          24          25          26          27          28          29          30          31
+    &trans      &none       &none       &none       &none       &none           &kp F1      &kp F2      &kp F3      &kp F12     &none       &trans
+//                                          32          33          34          35          36          37
+                                            &none       &none       &trans      &trans      &none       &none
+            >;
+        };
+
+        // ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+
+        hypr_layer {
+            // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+
+            label = "HYPR";
+
+            // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+            //             ┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓   ┏━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┓
+            //             ┃    S+H    ┃    S+J    ┃    S+K    ┃    S+L    ┃    S+D    ┃   ┃  (none)   ┃  (none)   ┃  (none)   ┃  (none)   ┃  (none)   ┃
+            //             ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫
+            //             ┃    S+1    ┃    S+2    ┃    S+3    ┃    S+4    ┃    S+5    ┃   ┃  (none)   ┃  (none)   ┃  (none)   ┃  (none)   ┃  (none)   ┃
+            // ┏━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┓
+            // ┃  (trans)  ┃  SPC/S+Q  ┃   S+SPC   ┃   S+BS    ┃    S+F    ┃    S+Q    ┃   ┃  (none)   ┃  (none)   ┃  (none)   ┃  (none)   ┃  (none)   ┃  (trans)  ┃
+            // ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┫   ┣━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━╋━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
+            //                                     ┃  (none)   ┃  (none)   ┃  (trans)  ┃   ┃  (none)   ┃  (none)   ┃  (none)   ┃
+            //                                     ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛   ┗━━━━━━━━━━━┻━━━━━━━━━━━┻━━━━━━━━━━━┛
+            //
+            // reached by holding Space; Super is already held by the hyper-space macro
+            // S = Super; tap = window command, hold = same command + Shift (move/resize)
+
+            bindings = <
+//  0           1           2           3           4               5           6           7           8           9
+                &mt LG(LS(H)) LG(H) &mt LG(LS(J)) LG(J) &mt LG(LS(K)) LG(K) &mt LG(LS(L)) LG(L) &mt LG(ENTER) LG(D) &none &none  &none       &none       &none
+//  10          11          12          13          14              15          16          17          18          19
+                &mt LS(LG(N1)) LG(N1) &mt LG(LS(N2)) LG(N2) &mt LG(LS(N3)) LG(N3) &mt LG(LS(N4)) LG(N4) &mt LG(LS(N5)) LG(N5) &none &none &none &none &none
+//  20          21          22          23          24          25          26          27          28          29          30          31
+    &trans      &mt LG(LS(Q)) SPACE &kp LG(SPACE) &kp LG(BACKSPACE) &kp LG(F) &kp LG(Q) &none &none &none &none &none &trans
+//                                          32          33          34          35          36          37
+                                            &none       &none       &trans      &none       &none       &none
+            >;
+        };
     };
 };
