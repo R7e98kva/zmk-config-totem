@@ -46,7 +46,7 @@
 
 / {
     behaviors {
-        // press-and-HOLD (~300 ms) an outer thumb key (32/37) on SHORTNAVI or
+        // press-and-HOLD (~2 s) an outer thumb key (32/37) on SHORTNAVI or
         // SYMNUM → reboots THAT half into the UF2 bootloader for flashing.
         // Quick taps do nothing. Works one-sided: SHORTNAVI is held via the left
         // thumb (TAB), SYMNUM via the right thumb (SLASH) — no cross-half combo
@@ -57,7 +57,7 @@
             compatible = "zmk,behavior-hold-tap";
             #binding-cells = <0>;
             flavor = "hold-preferred";
-            tapping-term-ms = <300>;
+            tapping-term-ms = <2000>;
             bindings = <&bootloader &none>;
         };
     };
