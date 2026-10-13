@@ -5,7 +5,10 @@ manifest:
   projects:
     - name: zmk
       remote: zmkfirmware
-      revision: main
+      # pinned to a known-good main commit (Zephyr 4.1 era); the commit that
+      # produced the last full-firmware build. To update: change to main,
+      # confirm CI is green, then pin the new SHA.
+      revision: 4dd95d7840eb3d5a3f59bb29fbf1ab054715ef85
       import: app/west.yml
   self:
     path: config
